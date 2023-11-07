@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -37,15 +37,33 @@ async function run() {
     const database = client.db("jobFinderSylDB");
     const jobCollection = database.collection("jobCollection");
 
-    app.post("/addajob", async (req, res) => {
-      const newjob = req.body;
-      const result = await jobCollection.insertOne(newjob);
+    app.get("/jobdetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.findOne(query);
       res.send(result);
     });
 
     app.get("/alljobs", async (req, res) => {
-      const cursor = jobCollection.find();
+      console.log(req.query.employerEmail);
+      let query = {};
+      if (req.query?.employerEmail) {
+        query = { employerEmail: req.query.employerEmail };
+      }
+      const cursor = jobCollection.find(query);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // app.get("/alljobs", async (req, res) => {
+    //   const cursor = jobCollection.find();
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
+
+    app.post("/addajob", async (req, res) => {
+      const newjob = req.body;
+      const result = await jobCollection.insertOne(newjob);
       res.send(result);
     });
 
