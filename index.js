@@ -36,6 +36,7 @@ async function run() {
     // await client.connect();
     const database = client.db("jobFinderSylDB");
     const jobCollection = database.collection("jobCollection");
+    const applyCollection = database.collection("applyCollection");
 
     app.get("/jobdetails/:id", async (req, res) => {
       const id = req.params.id;
@@ -95,6 +96,22 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await jobCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // Apply related API
+    app.post("/appliedjobs", async (req, res) => {
+      const newapply = req.body;
+      const result = await applyCollection.insertOne(newapply);
+      const jobId = newapply.jobId;
+
+      const filter = { _id: new ObjectId(jobId) };
+      const update = {
+        $inc: {
+          totalApplicant: 1,
+        },
+      };
+      const updateResult = await jobCollection.updateOne(filter, update);
+      res.send({ result, updateResult });
     });
 
     // Send a ping to confirm a successful connection
