@@ -67,6 +67,29 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/updatejob/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updatedJob = req.body;
+      console.log(updatedJob);
+      const job = {
+        $set: {
+          bannerImgUrl: updatedJob.bannerImgUrl,
+          logoUrl: updatedJob.logoUrl,
+          employerName: updatedJob.employerName,
+          jobTitle: updatedJob.jobTitle,
+          category: updatedJob.category,
+          salarymin: updatedJob.salarymin,
+          salarymax: updatedJob.salarymax,
+          deadline: updatedJob.deadline,
+          shortDes: updatedJob.shortDes,
+        },
+      };
+      const result = await jobCollection.updateOne(filter, job, options);
+      res.send(result);
+    });
+
     app.delete("/alljobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
