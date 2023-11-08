@@ -11,7 +11,10 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     // origin: ["http://localhost:5173", "http://localhost:5174"],
-    origin: ["https://jobfindersyl.web.app"],
+    origin: [
+      "https://jobfindersyl.web.app",
+      "https://jobfindersyl.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
