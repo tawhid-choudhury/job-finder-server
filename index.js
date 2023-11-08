@@ -102,7 +102,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/alljobspersonal", verifyToken, async (req, res) => {
+    app.get("/alljobspersonal", async (req, res) => {
       console.log("asdasds", req.cookies.token);
       // console.log(req.query.employerEmail);
       let query = {};
@@ -157,7 +157,7 @@ async function run() {
     });
 
     // Apply related API
-    app.get("/allapplied", verifyToken, async (req, res) => {
+    app.get("/allapplied", async (req, res) => {
       console.log(req.query.applicantEmail);
       let query = {};
       if (req.query?.applicantEmail) {
