@@ -31,6 +31,18 @@ app.listen(port, () => {
   console.log(`http://localhost:${port}/`);
 });
 
+// _______________________________mongoDB
+const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_Pass}@cluster0.woa6wff.mongodb.net/?retryWrites=true&w=majority`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
+
 //custom Middlewares
 const logger = async (req, res, next) => {
   console.log("called: ", req.method, req.host, req.originalUrl);
@@ -57,18 +69,6 @@ const verifyToken = async (req, res, next) => {
     next();
   });
 };
-
-// _______________________________mongoDB
-const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_Pass}@cluster0.woa6wff.mongodb.net/?retryWrites=true&w=majority`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
 
 async function run() {
   try {
