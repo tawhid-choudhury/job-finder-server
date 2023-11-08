@@ -99,6 +99,17 @@ async function run() {
     });
 
     // Apply related API
+    app.get("/allapplied", async (req, res) => {
+      console.log(req.query.applicantEmail);
+      let query = {};
+      if (req.query?.applicantEmail) {
+        query = { applicantEmail: req.query.applicantEmail };
+      }
+      const cursor = applyCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/appliedjobs", async (req, res) => {
       const newapply = req.body;
       const result = await applyCollection.insertOne(newapply);
