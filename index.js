@@ -12,6 +12,7 @@ app.use(
   cors({
     // origin: ["http://localhost:5173", "http://localhost:5174"],
     origin: [
+      "http://localhost:5173",
       "https://jobfindersyl.web.app",
       "https://jobfindersyl.firebaseapp.com",
     ],
@@ -40,6 +41,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
+    sameSite: "none",
   },
 });
 
@@ -50,7 +52,7 @@ const logger = async (req, res, next) => {
 };
 
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies?.token;
+  const token = req?.cookies?.token;
   console.log("token in middleware-----------" + token);
   if (!token) {
     return res.status(401).send({ message: "not authorized" });
@@ -65,7 +67,7 @@ const verifyToken = async (req, res, next) => {
 
     //decode
     req.user = decoded;
-    // console.log("user====", req.user);
+    console.log("user====", req.user);
     next();
   });
 };
@@ -81,7 +83,7 @@ async function run() {
     // AUTH________________
     app.post("/jwt", logger, async (req, res) => {
       const user = req.body;
-      // console.log(user);
+      console.log(user);
 
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SEC, {
         expiresIn: "1h",
@@ -90,9 +92,16 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: true,
+          sameSite: "none",
         })
         .send({ success: true });
+    });
+
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("Logged Out___________", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     app.get("/jobdetails/:id", async (req, res) => {
@@ -102,9 +111,21 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/alljobspersonal", async (req, res) => {
-      console.log("asdasds", req.cookies.token);
-      // console.log(req.query.employerEmail);
+    app.get("/alljobspersonal", logger, verifyToken, async (req, res) => {
+      console.log("cookies===", req.cookies.token);
+      console.log(
+        "___________________________________________________________________",
+        req.query.employerEmail
+      );
+      console.log(
+        "___________________________________________________________________",
+        req.user.email
+      );
+
+      if (req.user.email !== req.user.email) {
+        return res.status(403).send({ message: "FORBIDDEN ACCESS" });
+      }
+
       let query = {};
       if (req.query?.employerEmail) {
         query = { employerEmail: req.query.employerEmail };
@@ -157,7 +178,7 @@ async function run() {
     });
 
     // Apply related API
-    app.get("/allapplied", async (req, res) => {
+    app.get("/allapplied", verifyToken, async (req, res) => {
       console.log(req.query.applicantEmail);
       let query = {};
       if (req.query?.applicantEmail) {
@@ -184,7 +205,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
