@@ -122,7 +122,7 @@ async function run() {
         req.user.email
       );
 
-      if (req.user.email !== req.user.email) {
+      if (req.user.email !== req.query.employerEmail) {
         return res.status(403).send({ message: "FORBIDDEN ACCESS" });
       }
 
@@ -180,6 +180,11 @@ async function run() {
     // Apply related API
     app.get("/allapplied", verifyToken, async (req, res) => {
       console.log(req.query.applicantEmail);
+
+      if (req.user.email !== req.query.applicantEmail) {
+        return res.status(403).send({ message: "FORBIDDEN ACCESS" });
+      }
+
       let query = {};
       if (req.query?.applicantEmail) {
         query = { applicantEmail: req.query.applicantEmail };
